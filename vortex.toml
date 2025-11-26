@@ -1,0 +1,12 @@
+[server]
+port = 8080
+workers = 12  # Or omit to auto-detect CPU count
+
+[rate_limit]
+max_requests = 99999999999999
+window_seconds = 60  # Future: implement sliding window
+
+[modules]
+# Pipeline modules to load on startup (optional)
+# pipeline = ["auth.wat", "logic.wat"]
+pipeline = []

@@ -1,0 +1,7 @@
+//! Vortex library crate
+//!
+//! This exposes modules for testing and benchmarking.
+
+pub mod config;
+pub mod crdt;
+pub mod simd_parser;

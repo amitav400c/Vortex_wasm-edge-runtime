@@ -1,0 +1,10 @@
+[server]
+port = 8080
+workers = 12
+
+[rate_limit]
+max_requests = 100  # Lower limit for faster testing
+window_seconds = 60
+
+[modules]
+pipeline = []
