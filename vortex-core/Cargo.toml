@@ -2,6 +2,12 @@
 name = "vortex-core"
 version = "0.1.0"
 edition = "2021"
+description = "High-performance, thread-per-core WebAssembly runtime built with io_uring, glommio, and Wasmtime."
+authors = ["Antigravity Bot <bot@antigravity.ai>"]
+license = "MIT"
+repository = "https://github.com/yourusername/vortex"
+keywords = ["wasm", "runtime", "high-performance", "io_uring", "glommio"]
+categories = ["wasm", "network-programming", "asynchronous"]
 
 [dependencies]
 glommio = "0.8"
