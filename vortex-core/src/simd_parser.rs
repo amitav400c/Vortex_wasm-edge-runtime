@@ -10,6 +10,10 @@ use std::arch::x86_64::*;
 ///
 /// Uses AVX2 to scan 32 bytes at a time for '\r' characters,
 /// then validates the following byte is '\n'.
+/// # Safety
+///
+/// This function is unsafe because it uses AVX2 intrinsics. The caller must ensure
+/// that the CPU supports AVX2 instructions before calling this function.
 #[cfg(target_arch = "x86_64")]
 #[target_feature(enable = "avx2")]
 pub unsafe fn find_crlf_simd(buffer: &[u8]) -> Option<usize> {
@@ -78,6 +82,10 @@ pub fn find_crlf(buffer: &[u8]) -> Option<usize> {
 /// Parse HTTP method using SIMD comparison
 ///
 /// Compares the first 8 bytes against common HTTP methods in parallel.
+/// # Safety
+///
+/// This function is unsafe because it uses SSE4.2 intrinsics. The caller must ensure
+/// that the CPU supports SSE4.2 instructions before calling this function.
 #[cfg(target_arch = "x86_64")]
 #[target_feature(enable = "sse4.2")]
 pub unsafe fn parse_method_simd(buffer: &[u8]) -> Option<&str> {

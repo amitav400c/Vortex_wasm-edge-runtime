@@ -27,11 +27,7 @@ impl Pipeline {
 
                     // Check if body indicates an error status (hacky parsing for now)
                     if body.starts_with("HTTP/1.1 4") || body.starts_with("HTTP/1.1 5") {
-                        final_response = format!(
-                            "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
-                            body.len(),
-                            body
-                        );
+                        final_response = body;
                     } else {
                         final_response = format!(
                             "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",

@@ -91,7 +91,7 @@ impl Server {
                 Ok(stream) => {
                     let server = self.clone();
                     glommio::spawn_local(async move {
-                        if let Ok(_) = stream.set_nodelay(true) {
+                        if stream.set_nodelay(true).is_ok() {
                             // Nodelay set
                         }
                         if let Err(e) = server.handle_connection(stream).await {
@@ -111,7 +111,7 @@ impl Server {
     #[tracing::instrument(skip(self, stream), fields(peer_addr))]
     async fn handle_connection(self, mut stream: TcpStream) -> io::Result<()> {
         let peer_addr = stream.peer_addr().ok();
-        tracing::Span::current().record("peer_addr", &format!("{:?}", peer_addr));
+        tracing::Span::current().record("peer_addr", format!("{:?}", peer_addr));
         tracing::info!("Accepted connection");
 
         let mut buffer = [0u8; 4096]; // Larger buffer for reuse
