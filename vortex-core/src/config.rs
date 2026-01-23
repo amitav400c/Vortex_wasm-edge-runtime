@@ -69,7 +69,7 @@ impl Config {
         let mut config: Config = toml::from_str(&content)?;
 
         // Apply environment variable overrides
-        // Dont use ? -- use default, no server crash
+        // Dont use ? or unwrap() -- use default, no server crash
         if let Ok(port) = std::env::var("VORTEX_PORT") {
             config.server.port = port.parse()?;
         }
