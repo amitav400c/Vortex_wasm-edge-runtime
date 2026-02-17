@@ -30,6 +30,21 @@ We follow a **Hybrid GitHub Flow**.
     ```
 7.  **Push** your branch and open a **Pull Request** to the `dev` branch.
 
+## Branch Naming Conventions
+
+To keep the repository organized, please use the following prefixes for your branches:
+
+*   **`feature/`**: For new features (e.g., `feature/async-io`).
+*   **`fix/`**: For bug fixes (e.g., `fix/memory-leak`).
+*   **`docs/`**: For documentation updates (e.g., `docs/architecture-guide`).
+*   **`perf/`**: For performance improvements (e.g., `perf/simd-optimization`).
+
+## Performance Requirements
+
+Vortex is a high-performance runtime. All pull requests must pass the automated benchmark suite.
+*   The CI pipeline runs `cargo run --release --example benchmark`.
+*   Significant performance regressions will block merging.
+
 ## Code Style
 
 -   We use `rustfmt` for code styling. Please run `cargo fmt` before committing.
