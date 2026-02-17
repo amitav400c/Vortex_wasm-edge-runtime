@@ -1,0 +1,11 @@
+# This file serves to define who owns what part of the code.
+# When a pull request sets up a file, the owner will be automatically requested for review.
+
+# Global owner
+*       @amitav400c
+
+# Core logic
+/vortex-core/   @amitav400c
+
+# BPF logic
+/vortex-bpf/    @amitav400c

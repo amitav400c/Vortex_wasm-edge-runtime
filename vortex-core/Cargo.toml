@@ -18,19 +18,17 @@ httparse = "1.10.1"
 wasmtime = "21.0.1" # Using an older version compatible with wasmtime-wasi 21
 wasmtime-wasi = "21.0.1"
 arc-swap = "1.7.1"
-aya = { git = "https://github.com/aya-rs/aya", branch = "main" }
-aya-log = { git = "https://github.com/aya-rs/aya", branch = "main" }
+aya = { git = "https://github.com/aya-rs/aya", branch = "main", optional = true }
+aya-log = { git = "https://github.com/aya-rs/aya", branch = "main", optional = true }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-opentelemetry = "0.21"
-opentelemetry_sdk = { version = "0.21", features = ["rt-tokio"] }
-tracing-opentelemetry = "0.22"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 clap = { version = "4.0", features = ["derive"] }
 
 [features]
 simd = []
+bpf = ["dep:aya", "dep:aya-log"]
 
 [dev-dependencies]
 

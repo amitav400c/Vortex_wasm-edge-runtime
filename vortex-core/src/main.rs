@@ -65,10 +65,13 @@ fn main() -> anyhow::Result<()> {
     }
 
     // Initialize eBPF (Optional, requires root)
-    println!("Initializing eBPF...");
-    if let Err(e) = init_bpf() {
-        eprintln!("eBPF Warning: Failed to initialize: {}", e);
-        eprintln!("Continuing without eBPF stats...");
+    #[cfg(feature = "bpf")]
+    {
+        println!("Initializing eBPF...");
+        if let Err(e) = init_bpf() {
+            eprintln!("eBPF Warning: Failed to initialize: {}", e);
+            eprintln!("Continuing without eBPF stats...");
+        }
     }
 
     let port = config.server.port;
@@ -103,6 +106,7 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[cfg(feature = "bpf")]
 fn init_bpf() -> anyhow::Result<()> {
     use aya::programs::{Xdp, XdpFlags};
     use aya::Ebpf;
