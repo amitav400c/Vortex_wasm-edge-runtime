@@ -107,6 +107,11 @@ window_seconds = 60
 
 [modules]
 pipeline = ["auth.wat", "logic.wat"]
+
+[tls]
+# Enable TLS by uncommenting and providing paths
+# cert_path = "vortex-core/cert.pem"
+# key_path = "vortex-core/key.pem"
 ```
 
 **Environment variable overrides:**

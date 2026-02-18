@@ -34,6 +34,23 @@ Transfer/sec:     17.50MB
 - **Speedup**: **20x faster** than scalar implementation for 2KB requests.
 - **Latency**: ~30ns per request parsing.
 
+### 4. TLS Performance
+- **Throughput**: **752,475 requests/sec** (Single Node, 12 Cores, TLS 1.3)
+- **Latency (Avg)**: **1.06 ms**
+- **Overhead**: ~2x slowdown compared to plaintext (Plaintext ~1.5M RPS est, TLS ~750k RPS)
+
+#### Detailed TLS Results
+```
+Running 10s test @ https://localhost:8080
+  12 threads and 400 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.06ms    3.13ms 139.39ms   95.64%
+    Req/Sec    63.15k    10.38k   90.94k    64.67%
+  7572958 requests in 10.06s, 375.55MB read
+Requests/sec: 752475.07
+Transfer/sec:     37.32MB
+```
+
 ## Configuration
 - **OS**: Linux (x86_64)
 - **CPU**: 12 Cores
