@@ -1,8 +1,8 @@
-use futures_lite::{AsyncRead, AsyncWrite, AsyncReadExt, AsyncWriteExt, StreamExt};
+use futures_lite::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, StreamExt};
+use futures_rustls::TlsAcceptor;
 use glommio::net::TcpListener;
 use std::io;
 use std::net::SocketAddr;
-use futures_rustls::TlsAcceptor;
 
 use crate::pipeline::Pipeline;
 use crate::wasm::WasmEngine;
@@ -101,11 +101,13 @@ impl Server {
                             // Nodelay set
                         }
                         let peer_addr = stream.peer_addr().ok();
-                        
+
                         if let Some(acceptor) = server.tls_acceptor.clone() {
                             match acceptor.accept(stream).await {
                                 Ok(tls_stream) => {
-                                    if let Err(e) = server.handle_connection(tls_stream, peer_addr).await {
+                                    if let Err(e) =
+                                        server.handle_connection(tls_stream, peer_addr).await
+                                    {
                                         tracing::debug!("Connection error: {}", e);
                                     }
                                 }
@@ -130,8 +132,13 @@ impl Server {
     }
 
     #[tracing::instrument(skip(self, stream), fields(peer_addr))]
-    async fn handle_connection<S>(self, mut stream: S, peer_addr: Option<SocketAddr>) -> io::Result<()> 
-    where S: AsyncRead + AsyncWrite + Unpin + 'static
+    async fn handle_connection<S>(
+        self,
+        mut stream: S,
+        peer_addr: Option<SocketAddr>,
+    ) -> io::Result<()>
+    where
+        S: AsyncRead + AsyncWrite + Unpin + 'static,
     {
         tracing::Span::current().record("peer_addr", format!("{:?}", peer_addr));
         tracing::info!("Accepted connection");

@@ -22,12 +22,12 @@ pub fn load_server_config(cert_path: &str, key_path: &str) -> Result<Arc<ServerC
 fn load_certs(path: &str) -> Result<Vec<CertificateDer<'static>>> {
     let file = File::open(path).with_context(|| format!("Failed to open cert file: {}", path))?;
     let mut reader = BufReader::new(file);
-    
+
     // rustls-pemfile 2.0 returns an iterator of Results
     let certs = rustls_pemfile::certs(&mut reader)
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to parse certificates")?;
-        
+
     Ok(certs)
 }
 
