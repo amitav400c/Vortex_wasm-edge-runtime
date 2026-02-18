@@ -75,7 +75,7 @@ impl Server {
         max_requests: usize,
         tls_config: Option<Arc<rustls::ServerConfig>>,
     ) -> Self {
-        let tls_acceptor = tls_config.map(|c| TlsAcceptor::from(c));
+        let tls_acceptor = tls_config.map(TlsAcceptor::from);
         Self {
             port,
             registry,
@@ -115,10 +115,8 @@ impl Server {
                                     tracing::debug!("TLS Handshake error: {}", e);
                                 }
                             }
-                        } else {
-                            if let Err(e) = server.handle_connection(stream, peer_addr).await {
-                                tracing::debug!("Connection error: {}", e);
-                            }
+                        } else if let Err(e) = server.handle_connection(stream, peer_addr).await {
+                            tracing::debug!("Connection error: {}", e);
                         }
                     })
                     .detach();
