@@ -16,6 +16,8 @@ pub struct ServerConfig {
     pub port: u16,
     #[serde(default = "default_workers")]
     pub workers: usize,
+    pub cert_path: Option<String>,
+    pub key_path: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -52,6 +54,8 @@ impl Default for Config {
             server: ServerConfig {
                 port: default_port(),
                 workers: default_workers(),
+                cert_path: None,
+                key_path: None,
             },
             rate_limit: RateLimitConfig {
                 max_requests: default_max_requests(),

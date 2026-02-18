@@ -7,6 +7,7 @@ mod server;
 mod server_test;
 pub mod simd_parser; // Public for benchmarks
 mod wasm;
+mod tls;
 use clap::Parser;
 use glommio::{LocalExecutorBuilder, Placement};
 use server::{ModuleRegistry, Server};
@@ -50,6 +51,14 @@ fn main() -> anyhow::Result<()> {
     // Initialize CRDT Rate Limiter
     let rate_limiter = std::sync::Arc::new(crdt::GCounter::new(cpu_count));
 
+    // Load TLS Config if available
+    let tls_config = if let (Some(cert), Some(key)) = (&config.server.cert_path, &config.server.key_path) {
+        println!("Loading TLS config from {} and {}", cert, key);
+        Some(tls::load_server_config(cert, key).expect("Failed to load TLS config"))
+    } else {
+        None
+    };
+
     // Determine which modules to load (CLI overrides config)
     let module_paths = if !args.modules.is_empty() {
         args.modules
@@ -81,6 +90,7 @@ fn main() -> anyhow::Result<()> {
         .map(|i| {
             let registry = registry.clone();
             let rate_limiter = rate_limiter.clone();
+            let tls_config = tls_config.clone();
 
             std::thread::spawn(move || {
                 let builder =
@@ -88,7 +98,7 @@ fn main() -> anyhow::Result<()> {
 
                 builder
                     .spawn(move || async move {
-                        let server = Server::new(port, registry, rate_limiter, i, max_requests);
+                        let server = Server::new(port, registry, rate_limiter, i, max_requests, tls_config);
                         server.run().await
                     })
                     .expect("failed to spawn executor")

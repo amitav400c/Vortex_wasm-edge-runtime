@@ -1,6 +1,8 @@
-use futures_lite::{AsyncReadExt, AsyncWriteExt, StreamExt};
-use glommio::net::{TcpListener, TcpStream};
+use futures_lite::{AsyncRead, AsyncWrite, AsyncReadExt, AsyncWriteExt, StreamExt};
+use glommio::net::TcpListener;
 use std::io;
+use std::net::SocketAddr;
+use futures_rustls::TlsAcceptor;
 
 use crate::pipeline::Pipeline;
 use crate::wasm::WasmEngine;
@@ -61,6 +63,7 @@ pub struct Server {
     rate_limiter: Arc<GCounter>,
     node_id: usize,
     max_requests: usize, // Configurable rate limit
+    tls_acceptor: Option<TlsAcceptor>,
 }
 
 impl Server {
@@ -70,13 +73,16 @@ impl Server {
         rate_limiter: Arc<GCounter>,
         node_id: usize,
         max_requests: usize,
+        tls_config: Option<Arc<rustls::ServerConfig>>,
     ) -> Self {
+        let tls_acceptor = tls_config.map(|c| TlsAcceptor::from(c));
         Self {
             port,
             registry,
             rate_limiter,
             node_id,
             max_requests,
+            tls_acceptor,
         }
     }
 
@@ -94,8 +100,23 @@ impl Server {
                         if stream.set_nodelay(true).is_ok() {
                             // Nodelay set
                         }
-                        if let Err(e) = server.handle_connection(stream).await {
-                            tracing::debug!("Connection error: {}", e);
+                        let peer_addr = stream.peer_addr().ok();
+                        
+                        if let Some(acceptor) = server.tls_acceptor.clone() {
+                            match acceptor.accept(stream).await {
+                                Ok(tls_stream) => {
+                                    if let Err(e) = server.handle_connection(tls_stream, peer_addr).await {
+                                        tracing::debug!("Connection error: {}", e);
+                                    }
+                                }
+                                Err(e) => {
+                                    tracing::debug!("TLS Handshake error: {}", e);
+                                }
+                            }
+                        } else {
+                            if let Err(e) = server.handle_connection(stream, peer_addr).await {
+                                tracing::debug!("Connection error: {}", e);
+                            }
                         }
                     })
                     .detach();
@@ -109,8 +130,9 @@ impl Server {
     }
 
     #[tracing::instrument(skip(self, stream), fields(peer_addr))]
-    async fn handle_connection(self, mut stream: TcpStream) -> io::Result<()> {
-        let peer_addr = stream.peer_addr().ok();
+    async fn handle_connection<S>(self, mut stream: S, peer_addr: Option<SocketAddr>) -> io::Result<()> 
+    where S: AsyncRead + AsyncWrite + Unpin + 'static
+    {
         tracing::Span::current().record("peer_addr", format!("{:?}", peer_addr));
         tracing::info!("Accepted connection");
 
