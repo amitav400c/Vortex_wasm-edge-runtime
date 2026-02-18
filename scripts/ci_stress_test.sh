@@ -27,9 +27,11 @@ if ! command -v $WRK_CMD &> /dev/null && ! [ -x "$WRK_CMD" ]; then
     exit 1
 fi
 
-echo "Starting Vortex Server..."
-# Start server in background with dev config
-./target/release/vortex-core --config vortex.toml &
+echo "Starting Vortex Server (logs -> server_stress.log)..."
+# Start server in background with dev config, redirecting logs
+# Override workers to match available CPUs to avoid glommio panic
+export VORTEX_WORKERS=$THREADS
+./target/release/vortex-core --config vortex.toml > server_stress.log 2>&1 &
 SERVER_PID=$!
 
 # Ensure cleanup on exit
@@ -44,7 +46,7 @@ echo "Waiting for port $PORT..."
 RETRIES=30
 while [ $RETRIES -gt 0 ]; do
     if curl -k -s https://localhost:$PORT >/dev/null; then
-        echo "Server is up and reachable!"
+        echo "Server is up!"
         break
     fi
     sleep 1
@@ -52,14 +54,20 @@ while [ $RETRIES -gt 0 ]; do
 done
 
 if [ $RETRIES -eq 0 ]; then
-    echo "Timed out waiting for server to start."
+    echo "Timed out waiting for server to start. Logs:"
+    cat server_stress.log
     exit 1
 fi
 
-echo "Running wrk benchmark..."
+echo "Running wrk benchmark for $DURATION..."
 # Run wrk and capture output
-OUTPUT=$($WRK_CMD -t$THREADS -c$CONNECTIONS -d$DURATION https://localhost:$PORT)
-echo "$OUTPUT"
+if OUTPUT=$($WRK_CMD -t$THREADS -c$CONNECTIONS -d$DURATION https://localhost:$PORT); then
+    echo "$OUTPUT"
+else
+    echo "Benchmark failed!"
+    cat server_stress.log
+    exit 1
+fi
 
 # Simple assertion: Check if we have a valid transfer rate or request count
 if echo "$OUTPUT" | grep -q "Socket errors: connect"; then
