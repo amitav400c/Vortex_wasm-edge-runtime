@@ -12,7 +12,7 @@ mod tests {
                 let engine = WasmEngine::new().unwrap();
                 let registry = ModuleRegistry::new(engine);
                 let rate_limiter = std::sync::Arc::new(crate::crdt::GCounter::new(1));
-                let _server = Server::new(8081, registry.clone(), rate_limiter, 0, 100);
+                let _server = Server::new(8081, registry.clone(), rate_limiter, 0, 100, None);
 
                 // Load the simple WAT module
                 let wat = r#"

@@ -1,6 +1,8 @@
 [server]
 port = 8080
-workers = 12  # Or omit to auto-detect CPU count
+workers = 12
+# cert_path = "cert.pem"
+# key_path = "key.pem"
 
 [rate_limit]
 max_requests = 99999999999999
