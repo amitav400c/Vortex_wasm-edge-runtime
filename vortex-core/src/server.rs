@@ -64,6 +64,7 @@ pub struct Server {
     node_id: usize,
     max_requests: usize, // Configurable rate limit
     tls_acceptor: Option<TlsAcceptor>,
+    opa_config: Option<crate::config::OpaConfig>,
 }
 
 impl Server {
@@ -74,6 +75,7 @@ impl Server {
         node_id: usize,
         max_requests: usize,
         tls_config: Option<Arc<rustls::ServerConfig>>,
+        opa_config: Option<crate::config::OpaConfig>,
     ) -> Self {
         let tls_acceptor = tls_config.map(TlsAcceptor::from);
         Self {
@@ -83,6 +85,7 @@ impl Server {
             node_id,
             max_requests,
             tls_acceptor,
+            opa_config,
         }
     }
 
@@ -179,6 +182,31 @@ impl Server {
                             continue;
                         }
                         // }
+
+                        // OPA Authorization Check
+                        if let Some(opa_cfg) = &self.opa_config {
+                            let method_str = req.method.unwrap_or("GET");
+                            let path_str = req.path.unwrap_or("/");
+                            match crate::opa::check_opa_authorization(
+                                &opa_cfg.endpoint,
+                                method_str,
+                                path_str,
+                            )
+                            .await
+                            {
+                                Ok(true) => {
+                                    // Authorized, proceed
+                                }
+                                _ => {
+                                    // Denied or error
+                                    let response =
+                                        "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
+                                    stream.write_all(response.as_bytes()).await?;
+                                    stream.flush().await?;
+                                    continue;
+                                }
+                            }
+                        }
                     }
 
                     match (req.method, req.path) {

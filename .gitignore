@@ -1,3 +1,9 @@
 /target
 **/*.rs.bk
 Cargo.lock
+
+# Generated logs and certs
+server_stress.log
+vortex-core/cert.pem
+vortex-core/key.pem
+

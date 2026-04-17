@@ -1,5 +1,6 @@
 mod config;
 mod crdt;
+mod opa;
 mod parsing_test;
 mod pipeline;
 mod server;
@@ -92,6 +93,7 @@ fn main() -> anyhow::Result<()> {
             let registry = registry.clone();
             let rate_limiter = rate_limiter.clone();
             let tls_config = tls_config.clone();
+            let opa_config = config.opa.clone();
 
             std::thread::spawn(move || {
                 let builder =
@@ -99,8 +101,15 @@ fn main() -> anyhow::Result<()> {
 
                 builder
                     .spawn(move || async move {
-                        let server =
-                            Server::new(port, registry, rate_limiter, i, max_requests, tls_config);
+                        let server = Server::new(
+                            port,
+                            registry,
+                            rate_limiter,
+                            i,
+                            max_requests,
+                            tls_config,
+                            opa_config,
+                        );
                         server.run().await
                     })
                     .expect("failed to spawn executor")
