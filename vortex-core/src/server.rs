@@ -187,13 +187,20 @@ impl Server {
                         if let Some(opa_cfg) = &self.opa_config {
                             let method_str = req.method.unwrap_or("GET");
                             let path_str = req.path.unwrap_or("/");
-                            match crate::opa::check_opa_authorization(&opa_cfg.endpoint, method_str, path_str).await {
+                            match crate::opa::check_opa_authorization(
+                                &opa_cfg.endpoint,
+                                method_str,
+                                path_str,
+                            )
+                            .await
+                            {
                                 Ok(true) => {
                                     // Authorized, proceed
                                 }
                                 _ => {
                                     // Denied or error
-                                    let response = "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
+                                    let response =
+                                        "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
                                     stream.write_all(response.as_bytes()).await?;
                                     stream.flush().await?;
                                     continue;

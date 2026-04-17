@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
+    use crate::opa::check_opa_authorization;
     use crate::server::{ModuleRegistry, Server};
     use crate::wasm::WasmEngine;
-    use crate::opa::check_opa_authorization;
-    use glommio::{LocalExecutorBuilder, Placement};
-    use glommio::net::TcpListener;
     use futures_lite::{AsyncReadExt, AsyncWriteExt, StreamExt};
+    use glommio::net::TcpListener;
+    use glommio::{LocalExecutorBuilder, Placement};
 
     #[test]
     fn test_opa_authorization_allow() {
@@ -22,12 +22,16 @@ mod tests {
                     if let Some(Ok(mut stream)) = incoming.next().await {
                         let mut buf = [0u8; 1024];
                         let _ = stream.read(&mut buf).await;
-                        let response = "HTTP/1.1 200 OK\r\nContent-Length: 15\r\n\r\n{\"result\":true}";
+                        let response =
+                            "HTTP/1.1 200 OK\r\nContent-Length: 15\r\n\r\n{\"result\":true}";
                         let _ = stream.write_all(response.as_bytes()).await;
                     }
-                }).detach();
+                })
+                .detach();
 
-                let result = check_opa_authorization(&endpoint, "GET", "/api/data").await.unwrap();
+                let result = check_opa_authorization(&endpoint, "GET", "/api/data")
+                    .await
+                    .unwrap();
                 assert_eq!(result, true);
             })
             .unwrap();
@@ -50,12 +54,16 @@ mod tests {
                     if let Some(Ok(mut stream)) = incoming.next().await {
                         let mut buf = [0u8; 1024];
                         let _ = stream.read(&mut buf).await;
-                        let response = "HTTP/1.1 200 OK\r\nContent-Length: 16\r\n\r\n{\"result\":false}";
+                        let response =
+                            "HTTP/1.1 200 OK\r\nContent-Length: 16\r\n\r\n{\"result\":false}";
                         let _ = stream.write_all(response.as_bytes()).await;
                     }
-                }).detach();
+                })
+                .detach();
 
-                let result = check_opa_authorization(&endpoint, "POST", "/api/data").await.unwrap();
+                let result = check_opa_authorization(&endpoint, "POST", "/api/data")
+                    .await
+                    .unwrap();
                 assert_eq!(result, false);
             })
             .unwrap();

@@ -46,7 +46,8 @@ fn test_edge_cases() {
         let response = String::from_utf8_lossy(&output.stdout);
         assert!(
             response.contains("500 Internal Server Error"),
-            "Trap should return 500. Got: {}", response
+            "Trap should return 500. Got: {}",
+            response
         );
     }
 
@@ -97,7 +98,11 @@ fn test_opa_attacks() {
             .output()
             .expect("Failed to run curl");
         let response = String::from_utf8_lossy(&output.stdout);
-        assert!(response.contains("403 Forbidden"), "Offline OPA should fail closed with 403. Got: {}", response);
+        assert!(
+            response.contains("403 Forbidden"),
+            "Offline OPA should fail closed with 403. Got: {}",
+            response
+        );
     }
 
     server1.kill().unwrap();
@@ -126,7 +131,8 @@ fn test_opa_attacks() {
             if let Ok((mut stream, _)) = listener_clone.accept() {
                 let mut buf = [0u8; 1024];
                 let _ = stream.read(&mut buf);
-                let _ = stream.write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 15\r\n\r\n{INVALID_JSON");
+                let _ =
+                    stream.write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 15\r\n\r\n{INVALID_JSON");
             }
         });
 
@@ -137,7 +143,11 @@ fn test_opa_attacks() {
             .output()
             .unwrap();
         let response = String::from_utf8_lossy(&output.stdout);
-        assert!(response.contains("403 Forbidden"), "Malformed JSON should fail closed with 403. Got: {}", response);
+        assert!(
+            response.contains("403 Forbidden"),
+            "Malformed JSON should fail closed with 403. Got: {}",
+            response
+        );
     }
 
     // Test 3: OPA Timeout Attack
@@ -149,7 +159,8 @@ fn test_opa_attacks() {
                 let _ = stream.read(&mut buf);
                 // Sleep for 2 seconds to trigger the 500ms timeout
                 thread::sleep(Duration::from_secs(2));
-                let _ = stream.write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 15\r\n\r\n{\"result\":true}");
+                let _ = stream
+                    .write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 15\r\n\r\n{\"result\":true}");
             }
         });
 
@@ -160,7 +171,11 @@ fn test_opa_attacks() {
             .output()
             .unwrap();
         let response = String::from_utf8_lossy(&output.stdout);
-        assert!(response.contains("403 Forbidden"), "Timeout should fail closed with 403. Got: {}", response);
+        assert!(
+            response.contains("403 Forbidden"),
+            "Timeout should fail closed with 403. Got: {}",
+            response
+        );
     }
 
     server2.kill().unwrap();

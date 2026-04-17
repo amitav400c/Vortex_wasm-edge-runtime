@@ -1,5 +1,6 @@
 mod config;
 mod crdt;
+mod opa;
 mod parsing_test;
 mod pipeline;
 mod server;
@@ -8,7 +9,6 @@ mod server_test;
 pub mod simd_parser; // Public for benchmarks
 mod tls;
 mod wasm;
-mod opa;
 use clap::Parser;
 use glommio::{LocalExecutorBuilder, Placement};
 use server::{ModuleRegistry, Server};
@@ -101,8 +101,15 @@ fn main() -> anyhow::Result<()> {
 
                 builder
                     .spawn(move || async move {
-                        let server =
-                            Server::new(port, registry, rate_limiter, i, max_requests, tls_config, opa_config);
+                        let server = Server::new(
+                            port,
+                            registry,
+                            rate_limiter,
+                            i,
+                            max_requests,
+                            tls_config,
+                            opa_config,
+                        );
                         server.run().await
                     })
                     .expect("failed to spawn executor")

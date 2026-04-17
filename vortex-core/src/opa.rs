@@ -1,7 +1,7 @@
+use futures_lite::future::FutureExt;
 use futures_lite::{AsyncReadExt, AsyncWriteExt};
 use glommio::net::TcpStream;
 use serde::{Deserialize, Serialize};
-use futures_lite::future::FutureExt;
 use std::time::Duration;
 
 #[derive(Serialize)]
@@ -104,13 +104,17 @@ pub async fn check_opa_authorization(
     // Find the start of the body (after \r\n\r\n)
     if let Some(body_start_idx) = response_str.find("\r\n\r\n") {
         let body_content = &response_str[body_start_idx + 4..];
-        
+
         match serde_json::from_str::<OpaResponse>(body_content) {
             Ok(opa_res) => {
                 return Ok(opa_res.result.unwrap_or(false));
             }
             Err(e) => {
-                tracing::error!("Failed to parse OPA JSON response: {} - body was: {}", e, body_content);
+                tracing::error!(
+                    "Failed to parse OPA JSON response: {} - body was: {}",
+                    e,
+                    body_content
+                );
                 return Ok(false); // Fail closed
             }
         }
