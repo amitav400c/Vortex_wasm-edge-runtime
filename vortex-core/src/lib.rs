@@ -6,3 +6,4 @@ pub mod config;
 pub mod crdt;
 pub mod simd_parser;
 pub mod tls;
+pub mod opa;

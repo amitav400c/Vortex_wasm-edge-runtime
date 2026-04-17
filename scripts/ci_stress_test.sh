@@ -22,10 +22,21 @@ echo "===================================="
 # Check for wrk
 WRK_CMD=${WRK_BINARY:-wrk}
 if ! command -v $WRK_CMD &> /dev/null && ! [ -x "$WRK_CMD" ]; then
-    echo "Error: $WRK_CMD could not be found or is not executable."
-    echo "Please install it or set WRK_BINARY to the absolute path."
-    exit 1
+    if [ -x "/tmp/wrk/wrk" ]; then
+        WRK_CMD="/tmp/wrk/wrk"
+    else
+        echo "wrk not found. Building from source..."
+        rm -rf /tmp/wrk
+        git clone https://github.com/wg/wrk.git /tmp/wrk
+        cd /tmp/wrk
+        make -j${THREADS}
+        cd -
+        WRK_CMD="/tmp/wrk/wrk"
+    fi
 fi
+
+echo "Generating TLS Certificates..."
+./scripts/generate_certs.sh
 
 echo "Starting Vortex Server (logs -> server_stress.log)..."
 # Start server in background with dev config, redirecting logs

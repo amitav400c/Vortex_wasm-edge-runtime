@@ -1,8 +1,8 @@
 [server]
 port = 8080
 workers = 12
-# cert_path = "cert.pem"
-# key_path = "key.pem"
+cert_path = "vortex-core/cert.pem"
+key_path = "vortex-core/key.pem"
 
 [rate_limit]
 max_requests = 99999999999999
